@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
  import matplotlib.pyplot as plt
  import seaborn as sns
  import streamlit as st
@@ -52,3 +53,20 @@ def train_models(X: pd.DataFrame, y: pd.Series, test_size: float = 0.2, random_s
     rf_model = RandomForestRegressor(random_state=random_state)
     rf_model.fit(X_train, y_train)
     return lr_model, dt_model, rf_model, X_train, X_test, y_train, y_test
+
+
+def evaluate_models(lr_model, dt_model, rf_model, X_test: pd.DataFrame, y_test: pd.Series):
+    preds = {
+        "LinearRegression": lr_model.predict(X_test),
+        "DecisionTreeRegressor": dt_model.predict(X_test),
+        "RandomForestRegressor": rf_model.predict(X_test),
+    }
+    rows = []
+    for name, y_pred in preds.items():
+        r2 = r2_score(y_test, y_pred)
+        mae = mean_absolute_error(y_test, y_pred)
+        rmse = mean_squared_error(y_test, y_pred, squared=False)
+        rows.append({"model": name, "r2": r2, "mae": mae, "rmse": rmse})
+    results = pd.DataFrame(rows, columns=["model", "r2", "mae", "rmse"])
+    print(results)
+    return results

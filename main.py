@@ -11,6 +11,8 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
  import seaborn as sns
  import streamlit as st
  import joblib
+import os
+import json
  
  
 def preprocess_data(df: pd.DataFrame):
@@ -70,3 +72,22 @@ def evaluate_models(lr_model, dt_model, rf_model, X_test: pd.DataFrame, y_test: 
     results = pd.DataFrame(rows, columns=["model", "r2", "mae", "rmse"])
     print(results)
     return results
+
+
+def select_and_save_best(lr_model, dt_model, rf_model, X_test: pd.DataFrame, y_test: pd.Series, model_dir: str = "models"):
+    results = evaluate_models(lr_model, dt_model, rf_model, X_test, y_test)
+    models = {
+        "LinearRegression": lr_model,
+        "DecisionTreeRegressor": dt_model,
+        "RandomForestRegressor": rf_model,
+    }
+    best_idx = results["rmse"].idxmin()
+    best_name = results.loc[best_idx, "model"]
+    best_model = models[best_name]
+    os.makedirs(model_dir, exist_ok=True)
+    joblib.dump(best_model, os.path.join(model_dir, "best_model.joblib"))
+    with open(os.path.join(model_dir, "feature_columns.json"), "w", encoding="utf-8") as f:
+        json.dump(list(X_test.columns), f)
+    with open(os.path.join(model_dir, "evaluation_results.json"), "w", encoding="utf-8") as f:
+        json.dump(results.to_dict(orient="records"), f)
+    return best_name, best_model, results

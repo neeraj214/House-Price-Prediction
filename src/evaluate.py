@@ -15,7 +15,7 @@ def evaluate_models(lr_model, dt_model, rf_model, X_test: pd.DataFrame, y_test: 
     for name, y_pred in preds.items():
         r2 = r2_score(y_test, y_pred)
         mae = mean_absolute_error(y_test, y_pred)
-        rmse = mean_squared_error(y_test, y_pred, squared=False)
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
         rows.append({"model": name, "r2": r2, "mae": mae, "rmse": rmse})
     results = pd.DataFrame(rows, columns=["model", "r2", "mae", "rmse"])
     print("Model | R2 | MAE | RMSE")

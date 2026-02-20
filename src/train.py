@@ -12,23 +12,27 @@ def create_train_test(X: pd.DataFrame, y, test_size: float = 0.2, random_state: 
     return train_test_split(X, y, test_size=test_size, random_state=random_state)
  
  
-def train_models(X: pd.DataFrame, y, test_size: float = 0.2, random_state: int = 42):
+def train_models(X: pd.DataFrame, y, test_size: float = 0.2, random_state: int = 42, tune_rf: bool = True):
     X_train, X_test, y_train, y_test = create_train_test(X, y, test_size=test_size, random_state=random_state)
     lr_model = LinearRegression()
     lr_model.fit(X_train, y_train)
     dt_model = DecisionTreeRegressor(random_state=random_state)
     dt_model.fit(X_train, y_train)
-    rf_base = RandomForestRegressor(random_state=random_state)
-    param_grid = {
-        "n_estimators": [100, 200],
-        "max_depth": [None, 10, 20],
-        "min_samples_split": [2, 5],
-        "min_samples_leaf": [1, 2],
-        "max_features": ["sqrt", "log2"],
-    }
-    grid = GridSearchCV(rf_base, param_grid, cv=5, scoring="r2", n_jobs=-1)
-    grid.fit(X_train, y_train)
-    rf_model = grid.best_estimator_
+    if tune_rf:
+        rf_base = RandomForestRegressor(random_state=random_state)
+        param_grid = {
+            "n_estimators": [100, 200],
+            "max_depth": [None, 10, 20],
+            "min_samples_split": [2, 5],
+            "min_samples_leaf": [1, 2],
+            "max_features": ["sqrt", "log2"],
+        }
+        grid = GridSearchCV(rf_base, param_grid, cv=5, scoring="r2", n_jobs=-1)
+        grid.fit(X_train, y_train)
+        rf_model = grid.best_estimator_
+    else:
+        rf_model = RandomForestRegressor(random_state=random_state)
+        rf_model.fit(X_train, y_train)
     return lr_model, dt_model, rf_model, X_train, X_test, y_train, y_test
  
  

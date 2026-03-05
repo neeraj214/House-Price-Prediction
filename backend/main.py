@@ -5,7 +5,7 @@ from typing import Optional
 import uvicorn
 import random
 
-from .utils import clean_area, format_indian_currency, get_feature_influence
+from utils import clean_area, format_indian_currency, get_feature_influence
 
 app = FastAPI(title="Indian House Price Predictor")
 

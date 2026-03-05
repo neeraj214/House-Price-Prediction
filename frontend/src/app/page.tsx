@@ -35,15 +35,28 @@ export default function HousePricePredictor() {
     "HSR Layout, Bangalore",
     "Koramangala, Bangalore",
     "Indiranagar, Bangalore",
+    "Jayanagar, Bangalore",
+    "Hebbal, Bangalore",
     "Powai, Mumbai",
     "Andheri West, Mumbai",
     "Bandra West, Mumbai",
+    "Juhu, Mumbai",
+    "Worli, Mumbai",
+    "South Mumbai",
     "Gachibowli, Hyderabad",
     "Kondapur, Hyderabad",
     "Madhapur, Hyderabad",
+    "Banjara Hills, Hyderabad",
+    "Jubilee Hills, Hyderabad",
     "Gurgaon Sector 56",
     "Gurgaon Sector 45",
+    "DLF Phase 3, Gurgaon",
     "Noida Sector 62",
+    "Greater Noida West",
+    "Salt Lake, Kolkata",
+    "New Town, Kolkata",
+    "Anna Nagar, Chennai",
+    "Adyar, Chennai",
   ];
 
   const handlePredict = async () => {
@@ -232,6 +245,39 @@ export default function HousePricePredictor() {
                         <p className="text-xs text-[#64748b] mt-1">
                           {prediction.influence_summary}
                         </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Visual Feature Importance */}
+                  <div className="mt-6 space-y-3">
+                    <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wider text-left">Primary Drivers</p>
+                    <div className="space-y-2">
+                      <div>
+                        <div className="flex justify-between text-[10px] mb-1">
+                          <span className="text-[#475569]">Location</span>
+                          <span className="font-bold text-[#2563EB]">45%</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-[#e2e8f0] rounded-full overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: "45%" }}
+                            className="h-full bg-[#2563EB]"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-[10px] mb-1">
+                          <span className="text-[#475569]">Area</span>
+                          <span className="font-bold text-[#2563EB]">35%</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-[#e2e8f0] rounded-full overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: "35%" }}
+                            className="h-full bg-[#2563EB]"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

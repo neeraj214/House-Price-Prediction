@@ -1,51 +1,71 @@
-# Professional Indian House Price Predictor
+# House Price Prediction
 
-A high-end, production-ready house price estimation tool designed specifically for the Indian real estate market. Built with a "Light & Clean" aesthetic and modern full-stack technologies.
+Production-ready Streamlit application to predict house prices from user inputs or batch CSV files.
 
-## 🚀 Tech Stack
+## Features
 
-### **Backend**
-- **FastAPI**: High-performance Python framework for building APIs.
-- **Pydantic**: Robust data validation and settings management.
-- **Scikit-Learn**: Used for data cleaning logic and heuristic inference.
+- Streamlit UI with manual input and batch CSV prediction tabs
+- Indian currency formatting
+- Works with a trained pipeline (`models/best_pipeline.pkl`) or saved model + columns (`models/model_<stem>.pkl` and `models/feature_columns_<stem>.json`)
 
-### **Frontend**
-- **Next.js 15+**: React framework for the modern web.
-- **Tailwind CSS**: Utility-first CSS for professional styling.
-- **Lucide-React**: Clean, consistent iconography.
-- **Framer Motion**: Smooth animations for the "Reveal" effect.
+## Project Structure
 
-## ✨ Key Features
+- `app.py`: Streamlit app entrypoint
+- `models/`: Trained artifacts (not included)
+- `src/`: Training and evaluation utilities
+- `backend/`, `frontend/`: Optional FastAPI/Next.js prototype (not required for Streamlit deployment)
 
-- **Indian Context**: Handles "BHK" terminology, sqft ranges, and local amenities.
-- **Professional UI**: Clean light theme with #2563EB Royal Blue accents.
-- **Real-time Prediction**: Instant price estimation with a "fade-in" animation.
-- **Currency Formatting**: Results displayed in Indian numbering system (Lakhs/Crores).
-- **Validation**: Client-side and server-side validation for property details.
+## Local Setup
 
-## 🛠️ Installation & Setup
-
-### **1. Backend Setup**
 ```bash
-cd backend
-pip install -r requirements.txt
-python main.py
+python -m pip install -r requirements.txt
+python app.py
 ```
-Server runs at `http://localhost:8000`.
 
-### **2. Frontend Setup**
+This launches the Streamlit server using the built-in launcher.
+
+### Model Artifacts
+
+- Manual Input tab looks for `models/best_pipeline.pkl`
+- Batch Upload tab expects:
+  - `models/model_<stem>.pkl`
+  - `models/feature_columns_<stem>.json`
+
+## Deployment
+
+### Streamlit Community Cloud
+1. Push this repo to GitHub.
+2. Create a new app at https://share.streamlit.io/ and connect your repo.
+3. App file path: `app.py`
+4. Python version: 3.10
+5. Deploy.
+
+### Hugging Face Spaces
+1. Create a new Space (type: Streamlit).
+2. Select your GitHub repo as the source, or upload files.
+3. Ensure `requirements.txt` and `app.py` are present.
+4. The app will build and start automatically.
+
+### Render
+1. Create a new Web Service from your GitHub repo.
+2. Environment: Python
+3. Build Command: `pip install -r requirements.txt`
+4. Start Command: `streamlit run app.py --server.port $PORT --server.address 0.0.0.0`
+5. Deploy.
+
+## GitHub
+
+Initialize and push (replace ORIGIN_URL):
 ```bash
-cd frontend
-npm install
-npm run dev
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin ORIGIN_URL
+git push -u origin main
 ```
-Application runs at `http://localhost:3000`.
 
-## 📂 Project Structure
+## Troubleshooting
 
-- `backend/`: FastAPI server, data cleaning utilities, and prediction logic.
-- `frontend/`: Next.js application with Tailwind CSS and Framer Motion.
-- `models/`: (Optional) Storage for pre-trained scikit-learn pipelines.
-
----
-Developed with a focus on UX and precision for Indian home buyers and sellers.
+- No model found: upload `models/best_pipeline.pkl` for manual input, or a pair of `model_<stem>.pkl` and `feature_columns_<stem>.json` for batch mode.
+- Port binding on Render: ensure the start command uses `$PORT` and `0.0.0.0`.

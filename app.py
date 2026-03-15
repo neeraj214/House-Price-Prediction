@@ -1,12 +1,11 @@
 import os
-
+import sys
+import json
 import joblib
 import pandas as pd
 import streamlit as st
 
-
 st.set_page_config(page_title="House Price Predictor", page_icon="🏠", layout="wide")
-
 
 st.markdown(
     """
@@ -63,13 +62,11 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-
 @st.cache_resource
 def load_pipeline(path: str = "models/best_pipeline.pkl"):
     if not os.path.exists(path):
         return None
     return joblib.load(path)
-
 
 def format_inr(value: float) -> str:
     integer_value = int(round(value))
@@ -90,7 +87,6 @@ def format_inr(value: float) -> str:
         grouped = "-" + grouped
     return f"₹ {grouped}"
 
-
 def get_feature_importance_df(pipeline, reference_df: pd.DataFrame | None):
     estimator = pipeline
     if hasattr(estimator, "named_steps"):
@@ -110,24 +106,34 @@ def get_feature_importance_df(pipeline, reference_df: pd.DataFrame | None):
         return data
     return None
 
+def load_artifacts(stem: str, model_dir="models"):
+    model_path = os.path.join(model_dir, f"model_{stem}.pkl")
+    cols_path = os.path.join(model_dir, f"feature_columns_{stem}.json")
+    model = joblib.load(model_path)
+    with open(cols_path, "r", encoding="utf-8") as f:
+        feature_columns = json.load(f)
+    return model, feature_columns
 
-def main():
-    pipeline = load_pipeline()
-    st.markdown(
-        "<div class='main-title'>AI-Powered Real Estate Price Predictor</div>",
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        "<div class='subtitle'>Estimate property prices instantly using a production-ready machine learning pipeline.</div>",
-        unsafe_allow_html=True,
-    )
-    if pipeline is None:
-        st.error("Trained pipeline not found at models/best_pipeline.pkl. Train and save the pipeline before using the app.")
-        st.markdown(
-            "<div class='app-footer'>Developed using Scikit-learn &amp; Streamlit</div>",
-            unsafe_allow_html=True,
-        )
-        return
+def align_columns(df: pd.DataFrame, feature_columns):
+    for col in feature_columns:
+        if col not in df.columns:
+            df[col] = 0
+    df = df[feature_columns]
+    return df
+
+def list_model_stems(model_dir="models"):
+    stems = []
+    if not os.path.isdir(model_dir):
+        return stems
+    for fname in os.listdir(model_dir):
+        if fname.startswith("model_") and fname.endswith(".pkl"):
+            stem = fname[len("model_"):-len(".pkl")]
+            stems.append(stem)
+    return sorted(stems)
+
+def manual_input_tab(pipeline):
+    st.markdown("<div class='main-title'>AI-Powered Real Estate Price Predictor</div>", unsafe_allow_html=True)
+    st.markdown("<div class='subtitle'>Estimate property prices instantly using a machine learning pipeline.</div>", unsafe_allow_html=True)
     left_col, right_col = st.columns([1.1, 1])
     with left_col:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
@@ -171,50 +177,11 @@ def main():
         if importance_df is not None:
             chart_placeholder.bar_chart(importance_df.set_index("Feature"))
         st.success("Prediction generated successfully.")
-    st.markdown(
-        "<div class='app-footer'>Developed using Scikit-learn &amp; Streamlit</div>",
-        unsafe_allow_html=True,
-    )
 
-
-if __name__ == "__main__":
-    main()
-import streamlit as st
-import pandas as pd
-import joblib
-import json
-import os
- 
-def load_artifacts(stem: str, model_dir="models"):
-    model_path = os.path.join(model_dir, f"model_{stem}.pkl")
-    cols_path = os.path.join(model_dir, f"feature_columns_{stem}.json")
-    model = joblib.load(model_path)
-    with open(cols_path, "r", encoding="utf-8") as f:
-        feature_columns = json.load(f)
-    return model, feature_columns
- 
-def align_columns(df: pd.DataFrame, feature_columns):
-    for col in feature_columns:
-        if col not in df.columns:
-            df[col] = 0
-    df = df[feature_columns]
-    return df
-
-
-def list_model_stems(model_dir="models"):
-    stems = []
-    for fname in os.listdir(model_dir):
-        if fname.startswith("model_") and fname.endswith(".pkl"):
-            stem = fname[len("model_"):-len(".pkl")]
-            stems.append(stem)
-    return sorted(stems)
- 
- 
-def main():
-    st.title("House Price Prediction")
+def batch_upload_tab():
     stems = list_model_stems()
     if not stems:
-        st.warning("No saved models found in models/. Train first to create model files.")
+        st.warning("No models found in models/.")
         return
     stem = st.selectbox("Select saved model", stems, index=0)
     st.write("Upload a CSV with preprocessed features matching training columns.")
@@ -227,6 +194,22 @@ def main():
         out = pd.DataFrame({"Prediction": preds})
         st.write(out)
 
- 
+def main():
+    tabs = st.tabs(["Manual Input", "Batch Upload"])
+    with tabs[0]:
+        pipeline = load_pipeline()
+        if pipeline is None:
+            st.info("Place a trained pipeline at models/best_pipeline.pkl to use manual input.")
+        else:
+            manual_input_tab(pipeline)
+    with tabs[1]:
+        batch_upload_tab()
+    st.markdown("<div class='app-footer'>Developed using Scikit-learn &amp; Streamlit</div>", unsafe_allow_html=True)
+
 if __name__ == "__main__":
-     main()
+    try:
+        import streamlit.web.cli as stcli
+        sys.argv = ["streamlit", "run", __file__]
+        sys.exit(stcli.main())
+    except SystemExit:
+        pass

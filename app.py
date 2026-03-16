@@ -207,9 +207,9 @@ def main():
     st.markdown("<div class='app-footer'>Developed using Scikit-learn &amp; Streamlit</div>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
-    try:
-        import streamlit.web.cli as stcli
-        sys.argv = ["streamlit", "run", __file__]
-        sys.exit(stcli.main())
-    except SystemExit:
-        pass
+    # If invoked via `streamlit run`, just execute the app.
+    if "streamlit" in " ".join(sys.argv).lower():
+        main()
+    else:
+        # Replace current process with the Streamlit CLI to avoid duplicate runtime instances.
+        os.execvp(sys.executable, [sys.executable, "-m", "streamlit", "run", __file__])

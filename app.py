@@ -211,5 +211,6 @@ if __name__ == "__main__":
     if "streamlit" in " ".join(sys.argv).lower():
         main()
     else:
-        # Replace current process with the Streamlit CLI to avoid duplicate runtime instances.
-        os.execvp(sys.executable, [sys.executable, "-m", "streamlit", "run", __file__])
+        import subprocess
+        target = os.path.abspath(__file__)
+        subprocess.run([sys.executable, "-m", "streamlit", "run", target], check=True)

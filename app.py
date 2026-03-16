@@ -211,6 +211,8 @@ if __name__ == "__main__":
     if "streamlit" in " ".join(sys.argv).lower():
         main()
     else:
-        import subprocess
+        # Replace current process with Streamlit CLI to avoid duplicate Runtime
         target = os.path.abspath(__file__)
-        subprocess.run([sys.executable, "-m", "streamlit", "run", target], check=True)
+        if not target.lower().endswith(".py"):
+            target = target + ".py"
+        os.execv(sys.executable, [sys.executable, "-m", "streamlit", "run", target])

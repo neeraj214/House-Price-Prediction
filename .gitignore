@@ -1,16 +1,16 @@
- # Data folders: keep structure, ignore contents
- data/raw/*
- !data/raw/.gitkeep
- data/processed/*
- !data/processed/.gitkeep
- 
- # Python cache
- __pycache__/
- *.pyc
- 
- # Local tooling and logs
- .streamlit/
- *.log
- node_modules/
- /node_modules/
- backend/__pycache__/
+# Data folders: keep structure, ignore contents
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local tooling and logs
+.streamlit/
+*.log
+node_modules/
+/node_modules/
+backend/__pycache__/

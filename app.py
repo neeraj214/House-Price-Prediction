@@ -134,19 +134,31 @@ def list_model_stems(model_dir="models"):
 def manual_input_tab(pipeline):
     st.markdown("<div class='main-title'>AI-Powered Real Estate Price Predictor</div>", unsafe_allow_html=True)
     st.markdown("<div class='subtitle'>Estimate property prices instantly using a machine learning pipeline.</div>", unsafe_allow_html=True)
+    
     left_col, right_col = st.columns([1.1, 1])
+    
     with left_col:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.subheader("Property Details")
-        area = st.number_input("Area (sq ft)", min_value=200.0, max_value=20000.0, value=1200.0, step=50.0)
-        bedrooms = st.number_input("Bedrooms", min_value=1, max_value=10, value=3, step=1)
-        bathrooms = st.number_input("Bathrooms", min_value=1, max_value=10, value=2, step=1)
-        age = st.number_input("Age of House (years)", min_value=0.0, max_value=100.0, value=5.0, step=1.0)
-        quality = st.slider("Overall Quality (1-10)", min_value=1, max_value=10, value=7)
+        
+        # Get unique cities, types, neighborhoods from dataset for selectbox options
+        df = pd.read_csv('dataset_for_house_price/real_estate_dataset.csv')
+        cities = sorted(df['city'].unique())
+        property_types = sorted(df['type'].unique())
+        neighborhoods = sorted(df['neighborhood'].unique())
+        
+        city = st.selectbox("City", cities)
+        neighborhood = st.selectbox("Neighborhood", neighborhoods)
+        property_type = st.selectbox("Property Type", property_types)
+        size = st.number_input("Size (sqft)", min_value=100.0, max_value=50000.0, value=1200.0, step=50.0)
+        beds = st.number_input("Number of Bedrooms", min_value=0, max_value=20, value=3, step=1)
+        baths = st.number_input("Number of Bathrooms", min_value=0, max_value=20, value=2, step=1)
+        
         st.markdown("<div class='primary-button'>", unsafe_allow_html=True)
         predict_clicked = st.button("Predict Price")
         st.markdown("</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
+        
     with right_col:
         st.markdown("<div class='card prediction-card'>", unsafe_allow_html=True)
         st.subheader("Prediction Overview")
@@ -154,14 +166,16 @@ def manual_input_tab(pipeline):
         confidence_placeholder = st.empty()
         chart_placeholder = st.empty()
         st.markdown("</div>", unsafe_allow_html=True)
+        
     if predict_clicked:
         input_df = pd.DataFrame(
             {
-                "Area": [area],
-                "Bedrooms": [bedrooms],
-                "Bathrooms": [bathrooms],
-                "Age": [age],
-                "OverallQual": [quality],
+                "beds": [beds],
+                "baths": [baths],
+                "size_sqft": [size],
+                "city": [city],
+                "type": [property_type],
+                "neighborhood": [neighborhood]
             }
         )
         with st.spinner("Predicting house price..."):

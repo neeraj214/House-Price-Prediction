@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -22,51 +23,61 @@ import Navbar from "@/components/Navbar";
 
 export default function PredictorPage() {
   const [formData, setFormData] = useState({
-    area: "1200",
-    bhk: 2,
-    bathrooms: 2,
-    balcony: 1,
-    location: "Electronic City, Bangalore",
+    city: "",
+    neighborhood: "",
+    property_type: "",
+    size: 1200,
+    beds: 3,
+    baths: 2,
   });
 
+  const [cities, setCities] = useState<string[]>([]);
+  const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
+  const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
   const [prediction, setPrediction] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const locations = [
-    "Electronic City, Bangalore",
-    "Whitefield, Bangalore",
-    "Sarjapur Road, Bangalore",
-    "HSR Layout, Bangalore",
-    "Koramangala, Bangalore",
-    "Indiranagar, Bangalore",
-    "Jayanagar, Bangalore",
-    "Hebbal, Bangalore",
-    "Powai, Mumbai",
-    "Andheri West, Mumbai",
-    "Bandra West, Mumbai",
-    "Juhu, Mumbai",
-    "Worli, Mumbai",
-    "South Mumbai",
-    "Gachibowli, Hyderabad",
-    "Kondapur, Hyderabad",
-    "Madhapur, Hyderabad",
-    "Banjara Hills, Hyderabad",
-    "Jubilee Hills, Hyderabad",
-    "Gurgaon Sector 56",
-    "Gurgaon Sector 45",
-    "DLF Phase 3, Gurgaon",
-    "Noida Sector 62",
-    "Greater Noida West",
-    "Salt Lake, Kolkata",
-    "New Town, Kolkata",
-    "Anna Nagar, Chennai",
-    "Adyar, Chennai",
-  ];
+  // Load dataset for options
+  useEffect(() => {
+    const loadOptions = async () => {
+      try {
+        // Load dataset to get unique values (we'll simulate this or use a static list for now)
+        const datasetCities = [
+          "Bangalore", "Bhubaneswar", "Chennai", "Coimbatore", "Delhi", 
+          "Gandhinagar", "Guntur", "Gurgaon", "Hyderabad", "Jaipur", 
+          "Jalpaiguri", "Kakinada", "Kanyakumari", "Kochi", "Lucknow", 
+          "Mumbai", "Navi Mumbai", "Noida", "Patna", "Pune", "Thane", 
+          "Vijayawada", "Vikarabad", "Visakhapatnam", "Vizianagaram"
+        ];
+        const datasetTypes = [
+          "2 BHK Apartment", "2 BHK Flat", "3 BHK Apartment", "3 BHK Flat", 
+          "4 BHK Apartment", "4 BHK Flat", "Villa", "Residential land / Plot",
+          "Luxury Villa", "Independent Builder Floor"
+        ];
+        const datasetNeighborhoods = [
+          "Whitefield", "Sarjapur Road", "Electronic City", "Marathahalli",
+          "Koramangala", "Indiranagar", "HSR Layout", "Banjara Hills",
+          "Gachibowli", "Hitech City", "Gurgaon Sector 49", "Gurgaon Sector 50"
+        ];
+        setCities(datasetCities);
+        setPropertyTypes(datasetTypes);
+        setNeighborhoods(datasetNeighborhoods);
+        
+        // Set defaults
+        if (datasetCities.length > 0) setFormData(prev => ({ ...prev, city: datasetCities[0] }));
+        if (datasetTypes.length > 0) setFormData(prev => ({ ...prev, property_type: datasetTypes[0] }));
+        if (datasetNeighborhoods.length > 0) setFormData(prev => ({ ...prev, neighborhood: datasetNeighborhoods[0] }));
+      } catch (err) {
+        console.error("Error loading options:", err);
+      }
+    };
+    loadOptions();
+  }, []);
 
   const handlePredict = async () => {
-    if (parseFloat(formData.area) <= 0) {
-      setError("Area must be greater than 0");
+    if (formData.size <= 0) {
+      setError("Size must be greater than 0");
       return;
     }
     setError("");
@@ -113,14 +124,77 @@ export default function PredictorPage() {
               </h2>
 
               <div className="space-y-10">
+                {/* City */}
+                <div className="space-y-4">
+                  <label className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-blue-500" /> City
+                  </label>
+                  <div className="relative group">
+                    <select
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      className="w-full appearance-none bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 pr-12 text-slate-700 font-medium focus:bg-white focus:border-blue-500 focus:outline-none transition-all cursor-pointer"
+                    >
+                      {cities.map((city) => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                      <ChevronRight className="w-5 h-5 rotate-90" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Neighborhood */}
+                <div className="space-y-4">
+                  <label className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-blue-500" /> Neighborhood
+                  </label>
+                  <div className="relative group">
+                    <select
+                      value={formData.neighborhood}
+                      onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
+                      className="w-full appearance-none bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 pr-12 text-slate-700 font-medium focus:bg-white focus:border-blue-500 focus:outline-none transition-all cursor-pointer"
+                    >
+                      {neighborhoods.map((n) => (
+                        <option key={n} value={n}>{n}</option>
+                      ))}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                      <ChevronRight className="w-5 h-5 rotate-90" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Property Type */}
+                <div className="space-y-4">
+                  <label className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                    <Home className="w-4 h-4 text-blue-500" /> Property Type
+                  </label>
+                  <div className="relative group">
+                    <select
+                      value={formData.property_type}
+                      onChange={(e) => setFormData({ ...formData, property_type: e.target.value })}
+                      className="w-full appearance-none bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 pr-12 text-slate-700 font-medium focus:bg-white focus:border-blue-500 focus:outline-none transition-all cursor-pointer"
+                    >
+                      {propertyTypes.map((t) => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                      <ChevronRight className="w-5 h-5 rotate-90" />
+                    </div>
+                  </div>
+                </div>
+
                 {/* Area Input */}
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <label className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-                      <Square className="w-4 h-4 text-blue-500" /> Area (Sq. Ft.)
+                      <Square className="w-4 h-4 text-blue-500" /> Size (sqft)
                     </label>
                     <div className="px-4 py-1.5 bg-blue-50 rounded-full border border-blue-100">
-                      <span className="text-blue-700 font-bold text-lg">{formData.area}</span>
+                      <span className="text-blue-700 font-bold text-lg">{formData.size}</span>
                       <span className="text-blue-400 text-xs ml-1">sqft</span>
                     </div>
                   </div>
@@ -129,8 +203,8 @@ export default function PredictorPage() {
                     min="200"
                     max="10000"
                     step="50"
-                    value={formData.area}
-                    onChange={(e) => setFormData({ ...formData, area: e.target.value })}
+                    value={formData.size}
+                    onChange={(e) => setFormData({ ...formData, size: Number(e.target.value) })}
                     className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
                   />
                   <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
@@ -140,67 +214,22 @@ export default function PredictorPage() {
                   </div>
                 </div>
 
-                {/* BHK Selection */}
-                <div className="space-y-4">
-                  <label className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-                    <Bed className="w-4 h-4 text-blue-500" /> Number of Bedrooms (BHK)
-                  </label>
-                  <div className="flex flex-wrap gap-3">
-                    {[1, 2, 3, 4, 5].map((num) => (
-                      <button
-                        key={num}
-                        onClick={() => setFormData({ ...formData, bhk: num })}
-                        className={`px-6 py-3 rounded-2xl font-bold transition-all border-2 ${
-                          formData.bhk === num
-                            ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100 scale-105"
-                            : "bg-white text-slate-500 border-slate-100 hover:border-blue-200 hover:text-blue-500"
-                        }`}
-                      >
-                        {num === 5 ? "5+" : num} BHK
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Steppers */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                   <Stepper
-                    label="Bathrooms"
-                    icon={<Bath className="w-4 h-4 text-blue-500" />}
-                    value={formData.bathrooms}
-                    onIncrease={() => setFormData({ ...formData, bathrooms: Math.min(10, formData.bathrooms + 1) })}
-                    onDecrease={() => setFormData({ ...formData, bathrooms: Math.max(1, formData.bathrooms - 1) })}
+                    label="Bedrooms"
+                    icon={<Bed className="w-4 h-4 text-blue-500" />}
+                    value={formData.beds}
+                    onIncrease={() => setFormData({ ...formData, beds: Math.min(20, formData.beds + 1) })}
+                    onDecrease={() => setFormData({ ...formData, beds: Math.max(0, formData.beds - 1) })}
                   />
                   <Stepper
-                    label="Balcony"
-                    icon={<Layout className="w-4 h-4 text-blue-500" />}
-                    value={formData.balcony}
-                    onIncrease={() => setFormData({ ...formData, balcony: Math.min(5, formData.balcony + 1) })}
-                    onDecrease={() => setFormData({ ...formData, balcony: Math.max(0, formData.balcony - 1) })}
+                    label="Bathrooms"
+                    icon={<Bath className="w-4 h-4 text-blue-500" />}
+                    value={formData.baths}
+                    onIncrease={() => setFormData({ ...formData, baths: Math.min(20, formData.baths + 1) })}
+                    onDecrease={() => setFormData({ ...formData, baths: Math.max(0, formData.baths - 1) })}
                   />
-                </div>
-
-                {/* Location Selection */}
-                <div className="space-y-4">
-                  <label className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-blue-500" /> Location / Area
-                  </label>
-                  <div className="relative group">
-                    <select
-                      value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                      className="w-full appearance-none bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 pr-12 text-slate-700 font-medium focus:bg-white focus:border-blue-500 focus:outline-none transition-all cursor-pointer"
-                    >
-                      {locations.map((loc) => (
-                        <option key={loc} value={loc}>
-                          {loc}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
-                      <ChevronRight className="w-5 h-5 rotate-90" />
-                    </div>
-                  </div>
                 </div>
 
                 <button
@@ -253,7 +282,7 @@ export default function PredictorPage() {
                       <div className="text-5xl sm:text-6xl font-black text-slate-900 mb-2 tracking-tighter">
                         <span className="text-blue-600">{prediction.formatted_prediction}</span>
                       </div>
-                      <p className="text-slate-400 text-sm font-medium mb-10">Calculated for {formData.location}</p>
+                      <p className="text-slate-400 text-sm font-medium mb-10">Calculated for {formData.city}</p>
 
                       <div className="space-y-6 text-left">
                         <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
@@ -276,7 +305,7 @@ export default function PredictorPage() {
                           </h4>
                           <DriverRow label="Location Dynamics" percentage={45} />
                           <DriverRow label="Square Footage" percentage={35} />
-                          <DriverRow label="BHK Configuration" percentage={20} />
+                          <DriverRow label="Bedrooms/Bathrooms" percentage={20} />
                         </div>
                       </div>
 
@@ -309,7 +338,7 @@ export default function PredictorPage() {
         </div>
 
         <footer className="mt-20 pt-10 border-t border-slate-200 text-center">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
             &copy; {new Date().getFullYear()} PropPredict Professional &bull; Designed for Indian Markets
           </p>
         </footer>
@@ -373,3 +402,4 @@ function DriverRow({ label, percentage }: { label: string; percentage: number })
     </div>
   );
 }
+

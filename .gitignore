@@ -14,3 +14,12 @@ __pycache__/
 node_modules/
 /node_modules/
 backend/__pycache__/
+
+# Model files
+models/*.pkl
+models/*.json
+
+# Temporary scripts
+explore_data.py
+test_preprocessing.py
+create_best_pipeline.py
